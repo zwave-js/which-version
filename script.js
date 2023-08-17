@@ -1,3 +1,10 @@
+async function fetchDriverLatestVersion() {
+	const response = await fetch("https://api.github.com/repos/zwave-js/node-zwave-js/releases");
+	const responseJson = await response.json();
+	return responseJson.filter(r => !r.prerelease)[0].tag_name;
+}
+
+
 async function fetchHAZUIAddonLatestVersion() {
 	const response = await fetch("https://api.github.com/repos/hassio-addons/addon-zwave-js-ui/releases");
 	const responseJson = await response.json();
@@ -43,6 +50,12 @@ async function fetchZUIDriverVersion(version) {
 	return responseJson.dependencies["zwave-js"].replace(/^[^~]/, "v");
 }
 
+async function fetchDriver() {
+	const driverVersion = await fetchDriverLatestVersion();
+
+	document.getElementById("driver__version").innerText = driverVersion;
+}
+
 async function fetchHAZUIAddon() {
 	const haAddonVersion = await fetchHAZUIAddonLatestVersion();
 	const haAddonZUIVersion = await fetchHAZUIAddonZUIVersion(haAddonVersion);
@@ -70,6 +83,7 @@ async function fetchHACoreAddon() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+	fetchDriver().catch(console.error);
 	fetchHAZUIAddon().catch(console.error);
 	fetchZUI().catch(console.error);
 	fetchHACoreAddon().catch(console.error);
