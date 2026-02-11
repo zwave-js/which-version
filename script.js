@@ -6,7 +6,7 @@ async function fetchDriverLatestVersion() {
 
 
 async function fetchHAZUIAddonLatestVersion() {
-	const response = await fetch("https://api.github.com/repos/hassio-addons/addon-zwave-js-ui/releases");
+	const response = await fetch("https://api.github.com/repos/hassio-addons/app-zwave-js-ui/releases");
 	const responseJson = await response.json();
 	return responseJson.filter(r => !r.prerelease)[0].tag_name;
 }
@@ -18,12 +18,13 @@ async function fetchZUILatestVersion() {
 }
 
 async function fetchHAZUIAddonZUIVersion(version) {
-	const Dockerfile = await fetch(`https://raw.githubusercontent.com/hassio-addons/addon-zwave-js-ui/${version}/zwave-js-ui/Dockerfile`);
+	const Dockerfile = await fetch(`https://raw.githubusercontent.com/hassio-addons/app-zwave-js-ui/${version}/zwave-js-ui/Dockerfile`);
 	const DockerfileText = await Dockerfile.text();
-	// ARG ZWAVE_JS_UI_VERSION="v8.18.0"
+	// ARG ZWAVE_JS_UI_VERSION="11.11.0"
 	const regex = /ARG ZWAVE_JS_UI_VERSION="(.*)"/gm;
 	const match = regex.exec(DockerfileText);
-	return match?.[1];
+	const zuiVersion = match?.[1];
+	return zuiVersion && !zuiVersion.startsWith("v") ? `v${zuiVersion}` : zuiVersion;
 }
 
 async function fetchHACoreAddonVersion() {
@@ -47,7 +48,7 @@ async function fetchHACoreAddonDriverVersion() {
 async function fetchZUIDriverVersion(version) {
 	const response = await fetch(`https://raw.githubusercontent.com/zwave-js/zwave-js-ui/${version}/package.json`);
 	const responseJson = await response.json();
-	return responseJson.dependencies["zwave-js"].replace(/^[^~]/, "v");
+	return "v" + responseJson.dependencies["zwave-js"].replace(/^[^0-9]*/, "");
 }
 
 async function fetchDriver() {
