@@ -3,22 +3,22 @@ function stripV(version) {
 }
 
 async function fetchDriverLatestVersion() {
-	const response = await fetch("https://api.github.com/repos/zwave-js/node-zwave-js/releases");
+	const response = await fetch("https://api.github.com/repos/zwave-js/zwave-js/releases/latest");
 	const responseJson = await response.json();
-	return responseJson.filter(r => !r.prerelease)[0].tag_name;
+	return responseJson.tag_name;
 }
 
 
 async function fetchHAZUIAppLatestVersion() {
-	const response = await fetch("https://api.github.com/repos/hassio-addons/app-zwave-js-ui/releases");
+	const response = await fetch("https://api.github.com/repos/hassio-addons/app-zwave-js-ui/releases/latest");
 	const responseJson = await response.json();
-	return responseJson.filter(r => !r.prerelease)[0].tag_name;
+	return responseJson.tag_name;
 }
 
 async function fetchZUILatestVersion() {
-	const response = await fetch("https://api.github.com/repos/zwave-js/zwave-js-ui/releases");
+	const response = await fetch("https://api.github.com/repos/zwave-js/zwave-js-ui/releases/latest");
 	const responseJson = await response.json();
-	return responseJson.filter(r => !r.prerelease)[0].tag_name;
+	return responseJson.tag_name;
 }
 
 async function fetchHAZUIAppZUIVersion(version) {
@@ -31,20 +31,17 @@ async function fetchHAZUIAppZUIVersion(version) {
 	return zuiVersion && !zuiVersion.startsWith("v") ? `v${zuiVersion}` : zuiVersion;
 }
 
-async function fetchHACoreAppVersion() {
-	const response = await fetch(`https://raw.githubusercontent.com/home-assistant/addons/master/zwave_js/config.yaml`);
-	const responseText = await response.text();
-	// version: 0.1.83
-	const regex = /^version: (.*)$/gm;
-	const match = regex.exec(responseText);
-	return match?.[1];
+async function fetchHACoreAppLatestVersion() {
+	const response = await fetch("https://api.github.com/repos/home-assistant/app-zwave-js/releases/latest");
+	const responseJson = await response.json();
+	return responseJson.tag_name;
 }
 
-async function fetchHACoreAppZUIVersion() {
-	const response = await fetch(`https://raw.githubusercontent.com/home-assistant/addons/master/zwave_js/build.yaml`);
+async function fetchHACoreAppZUIVersion(version) {
+	const response = await fetch(`https://raw.githubusercontent.com/home-assistant/app-zwave-js/${version}/zwave_js/Dockerfile`);
 	const responseText = await response.text();
-	//  ZWAVEJS_UI_VERSION: 11.11.0
-	const regex = /ZWAVEJS_UI_VERSION: (.*)/gm;
+	// ARG ZWAVEJS_UI_VERSION=11.26.2
+	const regex = /ARG ZWAVEJS_UI_VERSION=(.*)/gm;
 	const match = regex.exec(responseText);
 	const zuiVersion = match?.[1];
 	return zuiVersion && !zuiVersion.startsWith("v") ? `v${zuiVersion}` : zuiVersion;
@@ -81,8 +78,8 @@ async function fetchZUI() {
 }
 
 async function fetchHACoreApp() {
-	const appVersion = await fetchHACoreAppVersion();
-	const zuiVersion = await fetchHACoreAppZUIVersion();
+	const appVersion = await fetchHACoreAppLatestVersion();
+	const zuiVersion = await fetchHACoreAppZUIVersion(appVersion);
 	const zwavejsVersion = await fetchZUIDriverVersion(zuiVersion);
 
 	document.getElementById("ha-core__version").innerText = stripV(appVersion);
